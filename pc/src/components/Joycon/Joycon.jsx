@@ -1,18 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 
 class JoyConHID {
-  private globalPacketNumber = 0x00; // 0x0 ~ 0xf
-  constructor(private joyCon: any) {}
+  constructor(joyCon) {
+    this.joyCon = joyCon;
+    this.globalPacketNumber = 0x00; // 0x0 ~ 0xf
+  }
 
-  async sendCommand(subCommand: number, subCommandArguments: number): Promise<void> {
+  async sendCommand(subCommand, subCommandArguments) {
     this.joyCon.sendReport(0x01, this.createQuery(subCommand, subCommandArguments));
   }
 
-  /**
-   * create JoyCon sendReport query
-   * see: https://github.com/chromium/chromium/blob/ccd149af47315e4c6f2fc45d55be1b271f39062c/device/gamepad/nintendo_controller.cc#L1496
-   */
-  private createQuery(subCommand: number, subCommandArguments: number): Uint8Array {
+  // Joy-Con sendReport クエリを作成
+  // 参考: https://github.com/chromium/chromium/blob/ccd149af47315e4c6f2fc45d55be1b271f39062c/device/gamepad/nintendo_controller.cc#L1496
+  createQuery(subCommand, subCommandArguments) {
     const query = new Array(48).fill(0x00);
     query[0] = this.globalPacketNumber % 0x10; // 0x0 ~ 0xf
     query[1] = 0x00;
@@ -26,13 +27,13 @@ class JoyConHID {
   }
 }
 
-const JoyConComponent: React.FC = () => {
-  const [device, setDevice] = useState<HIDDevice | null>(null);
-  const [status, setStatus] = useState<string>('Joy-Con未接続');
-  const [ws, setWs] = useState<WebSocket | null>(null);
+const JoyConComponent = () => {
+  const [device, setDevice] = useState(null);
+  const [status, setStatus] = useState('Joy-Con未接続');
+  const [ws, setWs] = useState(null);
 
   // 共通のサブコマンド送信関数
-  const sendSubcommand = async (joycon: HIDDevice, subcommand: number, data: number[]) => {
+  const sendSubcommand = async (joycon, subcommand, data) => {
     const header = new Uint8Array(10).fill(0); // ダミーの振動データ
     const body = new Uint8Array([subcommand, ...data]);
     const buf = new Uint8Array(header.length + body.length);
@@ -43,14 +44,14 @@ const JoyConComponent: React.FC = () => {
   };
 
   // ジャイロ有効化
-  const enableGyro = async (joycon: HIDDevice) => {
+  const enableGyro = async (joycon) => {
     await sendSubcommand(joycon, 0x40, [0x01]);
     console.log('ジャイロ有効化コマンドを送信しました。');
   };
 
   // 加速度センサー有効化（JoyConHIDクラスを利用）
-  const enableAccelerometer = async (joycon: JoyConHID) => {
-    await joycon.sendCommand(0x40, 0x01);
+  const enableAccelerometer = async (joyconHID) => {
+    await joyconHID.sendCommand(0x40, 0x01);
     console.log('加速度センサー有効化コマンドを送信しました。');
   };
 
@@ -67,24 +68,25 @@ const JoyConComponent: React.FC = () => {
       setDevice(devices[0]);
       setStatus(`接続成功: ${devices[0].productName}`);
 
-      
       // input report イベントを監視して WebSocket 経由で送信
-      devices[0].addEventListener('inputreport', (event: HIDInputReportEvent) => {
-        const { reportId, data } = event;
-        // デバイスから受信したレポートデータを配列に変換
-        const deviceData = Array.from(new Uint8Array(data.buffer));
-        console.log('input report 受信:', reportId,
-          'X：', deviceData[37], deviceData[38],
-          'Y：', deviceData[39], deviceData[40],
-          'Z：', deviceData[41], deviceData[42]);
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify({ reportId, deviceData }));  // レポートデータを送信
-        }
+      devices[0].addEventListener('inputreport', (event) => {
+      const { reportId, data } = event;
+      // デバイスから受信したレポートデータを配列に変換
+      const deviceData = Array.from(new Uint8Array(data.buffer));
+      console.log('データ:', deviceData);
+      console.log('input report 受信:',
+        'X:', deviceData[35],deviceData[36],
+        'Y：', deviceData[37],deviceData[38],
+        'Z:', deviceData[39],deviceData[40],);
+        // 'Z:', deviceData[41],deviceData[42]);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ reportId, deviceData }));
+      }
       });
 
-      const joyCon = new JoyConHID(devices[0]);
+      const joyConHID = new JoyConHID(devices[0]);
       // 加速度センサー有効化
-      await enableAccelerometer(joyCon);
+      await enableAccelerometer(joyConHID);
       await delay(500); // センサーが有効になるまで待機
       // ジャイロ有効化
       await enableGyro(devices[0]);
@@ -94,7 +96,7 @@ const JoyConComponent: React.FC = () => {
     }
   };
 
-  // コンポーネントマウント時にWebSocket接続を確立
+  // コンポーネントマウント時に WebSocket 接続を確立
   useEffect(() => {
     console.log('WebSocketサーバーへ接続中...');
     const socket = new WebSocket('ws://localhost:8080');
@@ -104,13 +106,13 @@ const JoyConComponent: React.FC = () => {
       console.log('WebSocketサーバーに接続しました');
     };
 
-    socket.onmessage = async (event: MessageEvent) => {
+    socket.onmessage = async (event) => {
       const message = await event.data.text();
       console.log('メッセージを受信しました:', message);
-      // 必要に応じて、受信メッセージの処理をここに追加
+      // 必要に応じて受信メッセージの処理をここに追加
     };
 
-    socket.onerror = (error: Event) => {
+    socket.onerror = (error) => {
       console.error('WebSocketエラー:', error);
     };
 
@@ -131,9 +133,9 @@ const JoyConComponent: React.FC = () => {
       <button onClick={connectJoyCon}>Joy-Conを接続</button>
       <p>{status}</p>
     </div>
-  );
+    );
 };
 
 export default JoyConComponent;
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
