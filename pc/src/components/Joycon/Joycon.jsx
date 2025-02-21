@@ -31,6 +31,9 @@ const JoyConComponent = () => {
   const [device, setDevice] = useState(null);
   const [status, setStatus] = useState('Joy-Con未接続');
   const [ws, setWs] = useState(null);
+  const [accelerometer, setAccelerometer] = useState({ x: 0, y: 0, z: 0 });
+  const [isShake, setIsShake] = useState(false);
+  const THRESHOLD = 2; // 振動検知の閾値
 
   // 共通のサブコマンド送信関数
   const sendSubcommand = async (joycon, subcommand, data) => {
@@ -70,18 +73,40 @@ const JoyConComponent = () => {
 
       // input report イベントを監視して WebSocket 経由で送信
       devices[0].addEventListener('inputreport', (event) => {
-      const { reportId, data } = event;
-      // デバイスから受信したレポートデータを配列に変換
-      const deviceData = Array.from(new Uint8Array(data.buffer));
-      console.log('データ:', deviceData);
-      console.log('input report 受信:',
-        'X:', deviceData[35],deviceData[36],
-        'Y：', deviceData[37],deviceData[38],
-        'Z:', deviceData[39],deviceData[40],);
-        // 'Z:', deviceData[41],deviceData[42]);
-      if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ reportId, deviceData }));
-      }
+        console.log('input report 受信:', event);
+        const { data } = event;
+        // if (data.getUint8(0)%0x10 === 0x00) {
+          const accelX = data.getInt16(13, true) / 16384;
+          const accelY = data.getInt16(15, true) / 16384;
+          const accelZ = data.getInt16(17, true) / 16384;
+          const accel = Math.sqrt(accelX ** 2 + accelY ** 2 + accelZ ** 2);
+          console.log('加速度:', accel);
+          const input_button = data.getInt32(2,true);
+          console.log('input report 受信:', input_button);
+          if (accelX > THRESHOLD || accelY > THRESHOLD || accelZ > THRESHOLD || accel > THRESHOLD || input_button > 0) {
+            setIsShake(true);
+          } else {
+            setIsShake(false);
+          }
+          setAccelerometer({ x: accelX, y: accelY, z: accelZ });
+          // console.log('加速度:', { x: accelX, y: accelY, z: accelZ });
+    
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'accelerometer', data: { x: accelX, y: accelY, z: accelZ } }));
+          }
+        // }
+      // const { reportId, data } = event;
+      // // デバイスから受信したレポートデータを配列に変換
+      // const deviceData = Array.from(new Uint8Array(data.buffer));
+      // console.log('データ:', deviceData);
+      // console.log('input report 受信:',
+      //   'X:', deviceData[35],deviceData[36],
+      //   'Y：', deviceData[37],deviceData[38],
+      //   'Z:', deviceData[39],deviceData[40],);
+      //   // 'Z:', deviceData[41],deviceData[42]);
+      // if (ws && ws.readyState === WebSocket.OPEN) {
+      //   ws.send(JSON.stringify({ reportId, deviceData }));
+      // }
       });
 
       const joyConHID = new JoyConHID(devices[0]);
@@ -132,6 +157,8 @@ const JoyConComponent = () => {
       <h2>Joy-Con 接続＆デバイス情報送信テスト</h2>
       <button onClick={connectJoyCon}>Joy-Conを接続</button>
       <p>{status}</p>
+      <p>加速度: X: {accelerometer.x.toFixed(4)}, Y: {accelerometer.y.toFixed(4)}, Z: {accelerometer.z.toFixed(4)}</p>
+      {isShake && <p>振動を検知しました！</p>}
     </div>
     );
 };

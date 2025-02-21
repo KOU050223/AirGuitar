@@ -11,14 +11,13 @@ wss.on('connection', (ws) => {
       // 受信したメッセージの処理（例：入力データ、設定変更通知など）
       console.log('Received:', data);
       // 接続している他のクライアントへブロードキャストする例
-      // console.log(wss.clients);
       wss.clients.forEach((client) => {
-        console.log(client);
-        client.send(data);
+        // console.log(client);
+        // client.send(data);
         // 接続している他のクライアントへブロードキャスト
         if (client !== ws && client.readyState === WebSocket.OPEN) {
-          console.log('Broadcasting:', data);
-          client.send(data);
+          // console.log('Broadcasting:', data);
+          // client.send(data);
         }
       });
     });
