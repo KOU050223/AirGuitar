@@ -6,8 +6,19 @@ import ModeButton from '../components/ModeButton.jsx'
 // [お手軽・パワーコード・設定・？]モード実装予定
 const ModeSelect = () => {
   return (
-    <div>
-        
+    <div className='grid grid-cols-2 gap-4'>
+        <ModeButton
+          buttonName={'お手軽'}
+        />
+        <ModeButton
+          buttonName={'パワーコード'}
+        />
+        <ModeButton
+          buttonName={'設定'}
+        />
+        <ModeButton
+          buttonName={'？'}
+        />
     </div>
   )
 }
