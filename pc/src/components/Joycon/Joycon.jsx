@@ -83,17 +83,17 @@ const JoyConComponent = () => {
           console.log('加速度:', accel);
           const input_button = data.getInt32(2,true);
           console.log('input report 受信:', input_button);
-          if (accelX > THRESHOLD || accelY > THRESHOLD || accelZ > THRESHOLD || accel > THRESHOLD || input_button > 0) {
-            setIsShake(true);
-          } else {
-            setIsShake(false);
-          }
+          const currentIsShake = (accelX > THRESHOLD || accelY > THRESHOLD || accelZ > THRESHOLD || accel > THRESHOLD || input_button > 0);
+          // 状態を更新（必要であれば）
+          setIsShake(currentIsShake);
           setAccelerometer({ x: accelX, y: accelY, z: accelZ });
           // console.log('加速度:', { x: accelX, y: accelY, z: accelZ });
     
           if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'accelerometer', data: { x: accelX, y: accelY, z: accelZ } }));
+            console.log('WebSocket経由でデータ送信:', { isShake : currentIsShake });
+            ws.send(JSON.stringify({ isShake : currentIsShake })); 
           }
+
         // }
       // const { reportId, data } = event;
       // // デバイスから受信したレポートデータを配列に変換

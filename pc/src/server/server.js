@@ -10,6 +10,8 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
       // 受信したメッセージの処理（例：入力データ、設定変更通知など）
       console.log('Received:', data);
+      const message = data.toString('utf-8');
+      console.log('Decoded message:', message);
       // 接続している他のクライアントへブロードキャストする例
       wss.clients.forEach((client) => {
         // console.log(client);
