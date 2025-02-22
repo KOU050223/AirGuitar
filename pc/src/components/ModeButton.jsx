@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ModeButton = ({buttonName}) => {
+const ModeButton = ({buttonName, onClick}) => {
     const sendMessage = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             console.log('メッセージ送信中...');
@@ -11,7 +11,7 @@ const ModeButton = ({buttonName}) => {
         }
     }
 return (
-    <button className='bg-white shadow-md rounded-lg overflow-hidden' onClick={sendMessage}>
+    <button className='bg-white shadow-md rounded-lg overflow-hidden' onClick={onClick}>
         <div className='bg-blue-500 text-white p-4'>
             {buttonName}
         </div>

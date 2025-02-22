@@ -1,26 +1,18 @@
-import React from 'react'
-import ModeButton from '../components/ModeButton.jsx'
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import ModeButton from '../components/ModeButton.jsx';
 
-// モードセレクトをするページです
-// ここでモードを選択することで、PCのモードを変更することができます
-// [お手軽・パワーコード・設定・？]モード実装予定
 const ModeSelect = () => {
-  return (
-    <div className='grid grid-cols-2 gap-4'>
-        <ModeButton
-          buttonName={'お手軽'}
-        />
-        <ModeButton
-          buttonName={'パワーコード'}
-        />
-        <ModeButton
-          buttonName={'設定'}
-        />
-        <ModeButton
-          buttonName={'？'}
-        />
-    </div>
-  )
-}
+  const navigate = useNavigate();
 
-export default ModeSelect
+  return (
+    <div className="flex flex-wrap justify-center gap-4 p-4">
+      <ModeButton buttonName={'お手軽モード'} onClick={() => navigate('/preparation')} />
+      <ModeButton buttonName={'パワーコードモード'} onClick={() => navigate('/preparation')} />
+      <ModeButton buttonName={'音階設定モード'} onClick={() => navigate('/preparation')} />
+      <ModeButton buttonName={'？'} onClick={() => navigate('/mystery-mode')} />
+    </div>
+  );
+};
+
+export default ModeSelect;
