@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 
 class JoyConHID {
@@ -75,26 +74,32 @@ const JoyConComponent = () => {
       devices[0].addEventListener('inputreport', (event) => {
         console.log('input report 受信:', event);
         const { data } = event;
-        // if (data.getUint8(0)%0x10 === 0x00) {
-          const accelX = data.getInt16(13, true) / 16384;
-          const accelY = data.getInt16(15, true) / 16384;
-          const accelZ = data.getInt16(17, true) / 16384;
-          const accel = Math.sqrt(accelX ** 2 + accelY ** 2 + accelZ ** 2);
-          const input_button = data.getInt32(2,true);
-          const currentIsShake = (accelX > THRESHOLD || accelY > THRESHOLD || accelZ > THRESHOLD || accel > THRESHOLD || input_button > 0);
-          // 状態を更新（必要であれば）
-          setIsShake(currentIsShake);
-          setAccelerometer({ x: accelX, y: accelY, z: accelZ });
-          // console.log('加速度:', accel);
-          // console.log('input report 受信:', input_button);
-          // console.log('加速度:', { x: accelX, y: accelY, z: accelZ });
-          
-          if (ws && ws.readyState === WebSocket.OPEN) {
-            console.log('WebSocket経由でデータ送信:', { isShake : currentIsShake });
-            ws.send(JSON.stringify({ isShake : currentIsShake })); 
-          }
+        if (data.byteLength !== 48) {
+          console.error('不正なデータ長:', data.byteLength);
+          setStatus('不正なデータ長/一度切断して再接続してください');
+          return;
+        }
+        const accelX = data.getInt16(13, true) / 16384;
+        const accelY = data.getInt16(15, true) / 16384;
+        const accelZ = data.getInt16(17, true) / 16384;
+        const accel = Math.sqrt(accelX ** 2 + accelY ** 2 + accelZ ** 2);
+        const input_button = data.getInt32(2, true);
+        const currentIsShake =
+          accelX > THRESHOLD ||
+          accelY > THRESHOLD ||
+          accelZ > THRESHOLD ||
+          accel > THRESHOLD ||
+          input_button > 0;
 
-        // }
+        setIsShake(currentIsShake);
+        setAccelerometer({ x: accelX, y: accelY, z: accelZ });
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          // プロトコルに合わせ、type と value を含む boolState メッセージを送信
+          const message = JSON.stringify({ type: 'boolState', value: currentIsShake });
+          console.log('WebSocket経由でデータ送信:', message);
+          ws.send(message);
+        }
       });
 
       const joyConHID = new JoyConHID(devices[0]);
@@ -112,16 +117,18 @@ const JoyConComponent = () => {
   // コンポーネントマウント時に WebSocket 接続を確立
   useEffect(() => {
     console.log('WebSocketサーバーへ接続中...');
-    const socket = new WebSocket('ws://localhost:8080');
+    const socket = new WebSocket(import.meta.env.VITE_SERVER_URL);
     setWs(socket);
 
     socket.onopen = () => {
       console.log('WebSocketサーバーに接続しました');
+      // boolクライアントとして登録（ルームIDはroom1）
+      socket.send(JSON.stringify({ type: 'register', role: 'bool', room: 'room1' }));
     };
 
     socket.onmessage = async (event) => {
-      const message = await event.data.text();
-      console.log('メッセージを受信しました:', message);
+      const messageText = await event.data.text();
+      console.log('WebSocketサーバーからのメッセージ:', messageText);
       // 必要に応じて受信メッセージの処理をここに追加
     };
 
@@ -145,12 +152,15 @@ const JoyConComponent = () => {
       <h2>Joy-Con 接続＆デバイス情報送信テスト</h2>
       <button onClick={connectJoyCon}>Joy-Conを接続</button>
       <p>{status}</p>
-      <p>加速度: X: {accelerometer.x.toFixed(4)}, Y: {accelerometer.y.toFixed(4)}, Z: {accelerometer.z.toFixed(4)}</p>
+      <p>
+        加速度: X: {accelerometer.x.toFixed(4)}, Y: {accelerometer.y.toFixed(4)}, Z:{' '}
+        {accelerometer.z.toFixed(4)}
+      </p>
       {isShake && <p>振動を検知しました！</p>}
     </div>
-    );
+  );
 };
 
 export default JoyConComponent;
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
