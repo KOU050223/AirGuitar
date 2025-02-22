@@ -5,10 +5,10 @@ import { Link } from 'react-router-dom'
 
 // 指定するURLを列挙する（Modeに遷移するURL）
 const URL = {
-    EasyMode : 'https://172.16.0.42:5173/easy_mode',
-    PawerCodeMode : 'https://172.16.0.42:5173/pawer_code_mode',
-    SoundSettingMode : 'https://172.16.0.42:5173/sound_setting_mode',
-    Connect : 'https://172.16.0.42:5173/connect',
+    EasyMode : 'https://172.16.0.42:3000/easy_mode',
+    PawerCodeMode : 'https://172.16.0.42:3000/pawer_code_mode',
+    SoundSettingMode : 'https://172.16.0.42:3000/sound_setting_mode',
+    Connect : 'https://172.16.0.42:3000/connect',
 }as const;
 
 // 受け取るURLなどを定義する
