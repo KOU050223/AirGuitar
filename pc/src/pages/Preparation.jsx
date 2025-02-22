@@ -18,5 +18,3 @@ const preparation = () => {
     </div>
   )
 }
-
-export default preparation
