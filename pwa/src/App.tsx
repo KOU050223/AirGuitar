@@ -7,38 +7,23 @@ import SensorFusion from './Device/SensorFusion.tsx'
 import Joycon from './Joycon/Joycon.tsx'
 import { Routes, Route, Link } from 'react-router-dom'
 
+// ページコンポーネントのインポート
+import Connect from './pages/Connect.tsx'
+import EasyMode from './pages/EasyMode.tsx'
+import PawerCodeMode from './pages/PawerCodeMode.tsx'
+import SoundSettingMode from './pages/SoundSettingMode.tsx'
+
 function App() {
 
   return (
-    <div>
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/InertialMove">InertialMove</Link>
-        </li>
-        <li>
-          <Link to="/Joycon">Joycon</Link>
-        </li>
-        <li>
-          <Link to="/SensorFusion">SensorFusion</Link>
-        </li>
-        <li>
-          <Link to="/TiltMove">TiltMove</Link>
-        </li>
-        <li>
-          <Link to="/Guitar">Guitar</Link>
-        </li>
-      </ul>
+    <>
       <Routes>
-        <Route path="/InertialMove" element={<InertialMove />} />
-        <Route path="/Joycon" element={<Joycon />} />
-        <Route path="/SensorFusion" element={<SensorFusion />} />
-        <Route path="/TiltMove" element={<TiltMove />} />
-        <Route path="/Guitar" element={<Guitar />} />
+        <Route path="/" element={<Connect />} />
+        <Route path="/easy_mode" element={<EasyMode />} />
+        <Route path="/pawer_code_mode" element={<PawerCodeMode />} />
+        <Route path="/sound_setting_mode" element={<SoundSettingMode />} />
       </Routes>
-    </div>
+    </>
   )
 }
 
