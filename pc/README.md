@@ -13,3 +13,9 @@ ngrok http 8080
 ```
 
 ctrl + C でサーバー落とす
+
+
+# スタートコマンド
+```
+npm run dev
+```

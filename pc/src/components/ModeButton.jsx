@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ModeButton = ({buttonName,onClick}) => {
+const ModeButton = ({buttonName, onClick}) => {
     const sendMessage = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
             console.log('メッセージ送信中...');
