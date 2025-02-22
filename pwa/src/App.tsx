@@ -1,11 +1,6 @@
 import './Device/DeviceSensor.js'
 import './App.css'
-import Guitar from './Guitar.tsx'
-import TiltMove from './Device/TiltMove.tsx'
-import InertialMove from './Device/InertialMove.tsx'
-import SensorFusion from './Device/SensorFusion.tsx'
-import Joycon from './Joycon/Joycon.tsx'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 
 // ページコンポーネントのインポート
 import Connect from './pages/Connect.tsx'
@@ -17,6 +12,7 @@ function App() {
 
   return (
     <>
+      {/* ルーティングの設定 */}
       <Routes>
         <Route path="/" element={<Connect />} />
         <Route path="/easy_mode" element={<EasyMode />} />
