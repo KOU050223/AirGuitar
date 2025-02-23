@@ -57,6 +57,7 @@ const Preparation = ({ mode, setIsPlaying }) => {
           <div className="bg-white p-6 rounded-lg shadow-lg text-center">
             <p className="text-xl font-bold">スマートフォン接続用QRコード</p>
             <QRCodeSVG value={url} size={200} className="mx-auto my-4" /> {/* QRコード表示 */}
+            <p>{url}</p>
             <p className="text-sm text-gray-600">スマホでQRコードをスキャンしてください</p>
             <button
               onClick={() => setIsModalOpen(false)}
