@@ -5,6 +5,7 @@ dotenv.config();
 const port = process.env.PORT || 8080;
 // const wss = new WebSocketServer({ port });
 const wss = new WebSocketServer({ port: port });
+
 // ルームごとの状態を保持するオブジェクト
 const rooms = {};
 
@@ -15,7 +16,9 @@ const rooms = {};
  *   boolClient: WebSocket | null,
  *   lastButtonValue: number | null,
  *   lastBoolValue: boolean,
- *   processTimer: NodeJS.Timer | null
+ *   processTimer: NodeJS.Timer | null,
+ *   buttons: Array(8),
+ *   audioFiles: Array(8)
  * }
  */
 
@@ -50,6 +53,8 @@ wss.on('connection', (ws) => {
           lastButtonValue: null,
           lastBoolValue: false,
           processTimer: null,
+          buttons: new Array(8).fill(null), // 8つのボタン情報を格納
+          audioFiles: new Array(8).fill(null) // 8つの音声ファイルのパスやデータなど
         };
       }
 
@@ -59,12 +64,22 @@ wss.on('connection', (ws) => {
         ws.roomId = roomId;
         ws.role = 'button';
         console.log(`Registered button client in room: ${roomId}`);
-      } else if (message.role === 'bool') {
+      }
+      if (message.role === 'bool') {
         rooms[roomId].boolClient = ws;
         ws.roomId = roomId;
         ws.role = 'bool';
         console.log(`Registered bool client in room: ${roomId}`);
+        // mode が /sound_setting_mode の場合、初期データを登録する
+        if (message.mode === '/sound_setting_mode') {
+          console.log('message:', message);
+          console.log('ws:', ws);
+          rooms[roomId].buttons = message.soundName;
+          rooms[roomId].audioFiles = message.soundFiles;
+          console.log(`Room ${roomId} 初期化：buttons と audioFiles を登録しました。`);
+        }
       }
+      console.log('rooms:', rooms[roomId]);
       return;
     }
 
@@ -133,12 +148,20 @@ wss.on('connection', (ws) => {
 // タイマー開始関数
 function startProcessTimer(roomId) {
   const room = rooms[roomId];
-  if (room.processTimer !== null) return; // 既にタイマーが動作中
+  if (room.processTimer !== null) return; // 既にタイマーが動作中の場合は何もしない
   console.log(`Room ${roomId}: Start process timer`);
-  // 例として100ms間隔で処理を実行
+  // 100ms毎に処理を実行
   room.processTimer = setInterval(() => {
     if (room.lastBoolValue === true && room.lastButtonValue !== null) {
-      processEvent(roomId, room.lastButtonValue);
+      // 押されたボタンの名前が buttons 配列のどのインデックスにあるかを取得
+      const index = room.buttons.indexOf(room.lastButtonValue);
+      if (index !== -1) {
+        // 対応する audioFiles の音声ファイルを取得
+        const audioFile = room.audioFiles[index];
+        processEvent(roomId, room.lastButtonValue, audioFile);
+      } else {
+        console.log('buttons 配列内に押されたボタンが見つかりません。');
+      }
     }
   }, 100);
 }
@@ -155,14 +178,14 @@ function stopProcessTimer(roomId) {
 
 // ボタンとboolの条件が揃った場合の処理
 // ※ ここでは処理結果をボタンクライアントにのみ送信します
-function processEvent(roomId, button) {
+function processEvent(roomId, button, audioFile) {
   console.log(`Room ${roomId}: Processing event for button: ${button}`);
   const room = rooms[roomId];
-  const message = JSON.stringify({ type: 'process', button: button });
-  
-  if (room.buttonClient && room.buttonClient.readyState === room.buttonClient.OPEN) {
-    room.buttonClient.send(message);
-    console.log(`Sent process message to button client in room ${roomId}: ${message}`);
+  const message = JSON.stringify({ type: 'process', button: button, audioFile: audioFile });
+  console.log(message);
+  if (room.boolClient && room.buttonClient.readyState === room.boolClient.OPEN) {
+    room.boolClient.send(message);
+    console.log(`【process room ${roomId}: ${message}】`);
   }
 }
 
