@@ -1,4 +1,6 @@
 import React, { useState, useImperativeHandle, forwardRef, useEffect, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import { setSettings } from '../../features/settings/settingsSlice.js';
 
 class JoyConHID {
   constructor(joyCon) {
@@ -30,6 +32,7 @@ const JoyConComponent = forwardRef((props, ref) => {
   const wsRef = useRef(null); // WebSocket 接続は useRef で管理
   const [accelerometer, setAccelerometer] = useState({ x: 0, y: 0, z: 0 });
   const [isShake, setIsShake] = useState(false);
+  const dispatch = useDispatch();
   const THRESHOLD = 2;
 
   // WebSocket 接続（1回のみ）
@@ -56,6 +59,12 @@ const JoyConComponent = forwardRef((props, ref) => {
     };
     socket.onmessage = async (event) => {
       const messageText = await event.data;
+      // Reduxを使って音声ファイルのパスを保存
+      const parsedMessage = JSON.parse(messageText);
+      const soundPath = parsedMessage.audioFile;
+      console.log('soundPath:', soundPath); 
+      // !!!Redux!!!
+      dispatch(setSettings({ soundPath })); // ここで取得した音声ファイルのパスを保存
       console.log('WebSocketサーバーからのメッセージ:', messageText);
     };
     socket.onerror = (error) => {

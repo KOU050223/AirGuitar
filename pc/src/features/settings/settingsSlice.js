@@ -4,6 +4,7 @@ const initialState = {
   mode: '',
   soundNames: [],
   soundFiles: [],
+  soundPath: '',
 };
 
 const settingsSlice = createSlice({
@@ -11,10 +12,11 @@ const settingsSlice = createSlice({
   initialState,
   reducers: {
     setSettings: (state, action) => {
-      const { mode, soundNames, soundFiles } = action.payload;
+      const { mode, soundNames, soundFiles, soundPath } = action.payload;
       state.mode = mode;
       state.soundNames = soundNames;
       state.soundFiles = soundFiles;
+      state.soundPath = soundPath;
     },
   },
 });
