@@ -20,7 +20,7 @@ function App() {
       <li><Link to='/audiosettings'>AudioSettings</Link></li>
 
       <Routes>
-        {/* <Route path="/" element={<App />} /> */}
+        <Route path="/" element={<ModeSelect />} />
         <Route path="/modeselect" element={<ModeSelect />} />
         <Route path="/websocketconnector" element={<WebSocketConnector />} />
         <Route path="/joycon" element={<Joycon />} />

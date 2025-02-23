@@ -22,9 +22,6 @@ const ModeSelect = () => {
         '../assets/G.wav',
         '../assets/G(1).wav'
       ];
-      console.log('mode:', mode);
-      console.log('soundNames:', soundNames);
-      console.log('soundFiles:', soundFiles);
       // Redux に情報を保存
       dispatch(setSettings({ mode, soundNames, soundFiles }));
       navigate('/playpage');

@@ -4,7 +4,6 @@ import { useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const PlayPage = () => {
-  const location = useLocation();
   const [isPlaying, setIsPlaying] = useState(false);
   // Redux からグローバル状態を参照
   const mode = useSelector((state) => state.settings.mode);
@@ -25,11 +24,6 @@ const PlayPage = () => {
         soundName={soundNames}
         soundFiles={soundFiles}
       />
-      <div>
-        <p>Mode: {mode}</p>
-        <p>Sound Names: {soundNames.join(', ')}</p>
-        <p>Sound Files: {soundFiles.join(', ')}</p>
-      </div>
     </>
   );
 };

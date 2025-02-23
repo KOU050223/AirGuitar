@@ -55,7 +55,7 @@ const JoyConComponent = forwardRef((props, ref) => {
       socket.send(JSON.stringify(registerMessage));
     };
     socket.onmessage = async (event) => {
-      const messageText = await event.data.text();
+      const messageText = await event.data;
       console.log('WebSocketサーバーからのメッセージ:', messageText);
     };
     socket.onerror = (error) => {

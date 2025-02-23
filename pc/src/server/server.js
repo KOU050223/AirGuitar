@@ -148,12 +148,20 @@ wss.on('connection', (ws) => {
 // タイマー開始関数
 function startProcessTimer(roomId) {
   const room = rooms[roomId];
-  if (room.processTimer !== null) return; // 既にタイマーが動作中
+  if (room.processTimer !== null) return; // 既にタイマーが動作中の場合は何もしない
   console.log(`Room ${roomId}: Start process timer`);
-  // 例として100ms間隔で処理を実行
+  // 100ms毎に処理を実行
   room.processTimer = setInterval(() => {
     if (room.lastBoolValue === true && room.lastButtonValue !== null) {
-      processEvent(roomId, room.lastButtonValue);
+      // 押されたボタンの名前が buttons 配列のどのインデックスにあるかを取得
+      const index = room.buttons.indexOf(room.lastButtonValue);
+      if (index !== -1) {
+        // 対応する audioFiles の音声ファイルを取得
+        const audioFile = room.audioFiles[index];
+        processEvent(roomId, room.lastButtonValue, audioFile);
+      } else {
+        console.log('buttons 配列内に押されたボタンが見つかりません。');
+      }
     }
   }, 100);
 }
@@ -170,14 +178,14 @@ function stopProcessTimer(roomId) {
 
 // ボタンとboolの条件が揃った場合の処理
 // ※ ここでは処理結果をボタンクライアントにのみ送信します
-function processEvent(roomId, button) {
+function processEvent(roomId, button, audioFile) {
   console.log(`Room ${roomId}: Processing event for button: ${button}`);
   const room = rooms[roomId];
-  const message = JSON.stringify({ type: 'process', button: button });
-  
-  if (room.buttonClient && room.buttonClient.readyState === room.buttonClient.OPEN) {
-    room.buttonClient.send(message);
-    console.log(`Sent process message to button client in room ${roomId}: ${message}`);
+  const message = JSON.stringify({ type: 'process', button: button, audioFile: audioFile });
+  console.log(message);
+  if (room.boolClient && room.buttonClient.readyState === room.boolClient.OPEN) {
+    room.boolClient.send(message);
+    console.log(`【process room ${roomId}: ${message}】`);
   }
 }
 
