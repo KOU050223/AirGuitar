@@ -7,10 +7,9 @@ const ModeSelect = () => {
 
   return (
     <div className="flex flex-wrap justify-center gap-4 p-4">
-      <ModeButton buttonName={'お手軽モード'} onClick={() => navigate('/preparation')} />
-      <ModeButton buttonName={'パワーコードモード'} onClick={() => navigate('/preparation')} />
-      <ModeButton buttonName={'音階設定モード'} onClick={() => navigate('/preparation')} />
-      <ModeButton buttonName={'？'} onClick={() => navigate('/mystery-mode')} />
+      <ModeButton buttonName={'お手軽モード'} mode = {'/easy_mode'}onClick={() => navigate('/preparation')} />
+      <ModeButton buttonName={'パワーコードモード'} mode = {'/pawer_code_mode'}onClick={() => navigate('/preparation')} />
+      <ModeButton buttonName={'音階設定モード'} mode = {'/sound_setting_mode'} onClick={() => navigate('/preparation')} />
     </div>
   );
 };
