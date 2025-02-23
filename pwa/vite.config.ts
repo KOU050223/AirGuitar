@@ -10,4 +10,7 @@ export default defineConfig({
     basicSsl(),
     tailwindcss()
   ],
+  server: {
+    port: 3000
+  }
 })

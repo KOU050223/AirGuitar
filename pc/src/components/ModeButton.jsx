@@ -1,21 +1,17 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
-const ModeButton = ({buttonName, onClick}) => {
-    const sendMessage = () => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            console.log('メッセージ送信中...');
-            ws.send('Hello from PC management UI');
-            console.log('メッセージ送信完了');
-        } else {
-            console.log('WebSocketが接続されていません');
-        }
-    }
+const ModeButton = ({buttonName,mode ,onClick=()=>{} }) => {
+    const data = {
+        mode: mode
+    };
+
 return (
-    <button className='bg-white shadow-md rounded-lg overflow-hidden' onClick={onClick}>
+    <Link to='/playpage' state={data} className='bg-white shadow-md rounded-lg overflow-hidden' onClick={onClick}>
         <div className='bg-blue-500 text-white p-4'>
             {buttonName}
         </div>
-    </button>
+    </Link>
 )
 }
 

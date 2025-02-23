@@ -1,29 +1,33 @@
 import { useState } from 'react';
-import QRCode from 'react-qr-code'; // QRコード生成用ライブラリ
 import ModeButton from '../components/ModeButton.jsx';
+import { QRCodeSVG } from 'qrcode.react';
+import Joycon from '../components/Joycon/Joycon.jsx';
 
-const Preparation = () => {
+const Preparation = ({ mode, setIsPlaying }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const qrValue = "https://example.com/room123"; // QRコードの内容（ルームIDとURL）
 
   return (
     <div className='grid grid-cols-1 gap-4 w-1/3 mx-auto'>
       <ModeButton
         buttonName={'スマートフォン接続ボタン'}
-        onClick={() => setIsModalOpen(true)} // ボタンを押したらモーダルを開く
+        onClick={() => setIsModalOpen(true)}
       />
       <p>スマートフォン接続完了</p>
-      <ModeButton buttonName={'Nintendo Switch接続ボタン'} />
+      <ModeButton 
+        buttonName={'Nintendo Switch接続ボタン'}
+        onClick={handleJoyConConnect}
+      />
       <p>Nintendo Switch接続完了</p>
-      <ModeButton buttonName={'エアギターで気持ちよくなろう！'} />
+      <ModeButton 
+        buttonName={'エアギターで気持ちよくなろう！'} 
+        onClick={onStartGame}
+      />
 
       {/* モーダルウィンドウ */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-            <p className="text-xl font-bold">スマートフォン接続用QRコード</p>
-            <QRCode value={qrValue} size={200} className="mx-auto my-4" /> {/* QRコード表示 */}
-            <p className="text-sm text-gray-600">スマホでQRコードをスキャンしてください</p>
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-xl font-bold">HalloWould</p>
             <button
               onClick={() => setIsModalOpen(false)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
@@ -33,6 +37,11 @@ const Preparation = () => {
           </div>
         </div>
       )}
+
+      {/* Joy-Con コンポーネントを参照用にレンダリング（画面上には表示しない） */}
+      <div style={{ display: 'none' }}>
+        <Joycon ref={joyconRef} />
+      </div>
     </div>
   );
 };
