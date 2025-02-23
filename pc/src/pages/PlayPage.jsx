@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import Preparation from './Preparation';
+import React, {  useState,  useEffect  } from 'react';;
+import Preparation from './Preparation';;
 import { useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';;
 import myImage from '../assets/anpu.png';
 import myImage2 from '../assets/anpupegu.png';
-import myImage3 from '../assets/me-ta-.jpg';
-import background from '../assets/backgroundpicture.png';
+import videoFile from '../assets/guitarman_animation.mp4'; // 動画をインポート
+import videoFile2 from '../assets/me-ta-_animation.mp4'; // 動画をインポート
+import '../PlayPage.css'; // スタイルシートをインポート
 
 const PlayPage = () => {
   const [isPlaying, setIsPlaying] = useState(false);
