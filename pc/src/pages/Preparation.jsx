@@ -44,6 +44,7 @@ const Preparation = ({ mode, setIsPlaying, soundName, soundFiles }) => {
     }
   };
 
+
   return (
     <div className='grid grid-cols-1 gap-4 w-1/3 mx-auto'>
       <ModeButton
