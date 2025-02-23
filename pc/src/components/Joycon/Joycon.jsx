@@ -34,6 +34,7 @@ const JoyConComponent = forwardRef((props, ref) => {
   const [isShake, setIsShake] = useState(false);
   const dispatch = useDispatch();
   const THRESHOLD = 2;
+  const BPM = 1000; // 次がなるまでのms
 
   // WebSocket 接続（1回のみ）
   useEffect(() => {
@@ -67,10 +68,10 @@ const JoyConComponent = forwardRef((props, ref) => {
       // !!!Redux!!!
       dispatch(setSettings({ soundPath, isSound: true }));
       console.log('WebSocketサーバーからのメッセージ:', messageText);
-      // 300ms後に isSound を false に戻す
+      // ???ms後に isSound を false に戻す
       setTimeout(() => {
         dispatch(setSettings({ isSound: false }));
-      }, 300);
+      }, BPM);
     };
     socket.onerror = (error) => {
       console.error('WebSocketエラー:', error);
