@@ -13,14 +13,14 @@ const ModeSelect = () => {
       // テスト用データ（音階名と音声ファイルのパス）
       const soundNames = ['C', 'C(1)', 'E', 'Em', 'F', 'F(1)', 'G', 'G(1)'];
       const soundFiles = [
-        '../assets/C.wav',
-        '../assets/C(1).wav',
-        '../assets/E.wav',
-        '../assets/Em.wav',
-        '../assets/F.wav',
-        '../assets/F(1).wav',
-        '../assets/G.wav',
-        '../assets/G(1).wav'
+        'C.wav',
+        'C(1).wav',
+        'E.wav',
+        'Em.wav',
+        'F.wav',
+        'F(1).wav',
+        'G.wav',
+        'G(1).wav'
       ];
       // Redux に情報を保存
       dispatch(setSettings({ mode, soundNames, soundFiles }));

@@ -14,6 +14,27 @@ const PlayPage = () => {
   const soundNames = useSelector((state) => state.settings.soundNames);
   const soundFiles = useSelector((state) => state.settings.soundFiles);
   const soundPath = useSelector((state) => state.settings.soundPath);
+  const isSound = useSelector((state) => state.settings.isSound);
+
+  const generateAudioUrl = (fileName) => {
+    // この書き方は Vite や webpack で動的にファイルの URL を生成します
+    return new URL(`../assets/${fileName}`, import.meta.url).href;
+  };
+
+  const playSound = (soundPath) => {
+    const audio = new Audio(`${soundPath}`);
+    audio.play();
+  };
+
+  // isSound が true のときに soundPath の音声を再生する
+  useEffect(() => {
+    if (isSound && soundPath) {
+      // もし soundPath がファイル名だけなら generateAudioUrl を使って URL を作成
+      const audioUrl = generateAudioUrl(soundPath);
+      const audio = new Audio(audioUrl);
+      audio.play().catch((err) => console.error('Audio再生エラー:', err));
+    }
+  }, [isSound, soundPath]);
 
   return (
     <>

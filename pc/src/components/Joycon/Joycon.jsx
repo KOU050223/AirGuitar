@@ -58,14 +58,19 @@ const JoyConComponent = forwardRef((props, ref) => {
       socket.send(JSON.stringify(registerMessage));
     };
     socket.onmessage = async (event) => {
+      // WebSocket サーバーからのメッセージ受信（２つの条件が揃った時にメッセージが来る!!!）
       const messageText = await event.data;
       // Reduxを使って音声ファイルのパスを保存
       const parsedMessage = JSON.parse(messageText);
       const soundPath = parsedMessage.audioFile;
       console.log('soundPath:', soundPath); 
       // !!!Redux!!!
-      dispatch(setSettings({ soundPath })); // ここで取得した音声ファイルのパスを保存
+      dispatch(setSettings({ soundPath, isSound: true }));
       console.log('WebSocketサーバーからのメッセージ:', messageText);
+      // 300ms後に isSound を false に戻す
+      setTimeout(() => {
+        dispatch(setSettings({ isSound: false }));
+      }, 300);
     };
     socket.onerror = (error) => {
       console.error('WebSocketエラー:', error);
