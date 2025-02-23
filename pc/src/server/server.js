@@ -5,6 +5,7 @@ dotenv.config();
 const port = process.env.PORT || 8080;
 // const wss = new WebSocketServer({ port });
 const wss = new WebSocketServer({ port: port });
+
 // ルームごとの状態を保持するオブジェクト
 const rooms = {};
 
@@ -15,7 +16,9 @@ const rooms = {};
  *   boolClient: WebSocket | null,
  *   lastButtonValue: number | null,
  *   lastBoolValue: boolean,
- *   processTimer: NodeJS.Timer | null
+ *   processTimer: NodeJS.Timer | null,
+ *   buttons: Array(8),
+ *   audioFiles: Array(8)
  * }
  */
 
@@ -50,6 +53,8 @@ wss.on('connection', (ws) => {
           lastButtonValue: null,
           lastBoolValue: false,
           processTimer: null,
+          buttons: new Array(8).fill(null), // 8つのボタン情報を格納
+          audioFiles: new Array(8).fill(null) // 8つの音声ファイルのパスやデータなど
         };
       }
 
@@ -59,12 +64,22 @@ wss.on('connection', (ws) => {
         ws.roomId = roomId;
         ws.role = 'button';
         console.log(`Registered button client in room: ${roomId}`);
-      } else if (message.role === 'bool') {
+      }
+      if (message.role === 'bool') {
         rooms[roomId].boolClient = ws;
         ws.roomId = roomId;
         ws.role = 'bool';
         console.log(`Registered bool client in room: ${roomId}`);
+        // mode が /sound_setting_mode の場合、初期データを登録する
+        if (message.mode === '/sound_setting_mode') {
+          console.log('message:', message);
+          console.log('ws:', ws);
+          rooms[roomId].buttons = message.soundName;
+          rooms[roomId].audioFiles = message.soundFiles;
+          console.log(`Room ${roomId} 初期化：buttons と audioFiles を登録しました。`);
+        }
       }
+      console.log('rooms:', rooms[roomId]);
       return;
     }
 

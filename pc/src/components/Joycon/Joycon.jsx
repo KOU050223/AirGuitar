@@ -32,14 +32,27 @@ const JoyConComponent = forwardRef((props, ref) => {
   const [isShake, setIsShake] = useState(false);
   const THRESHOLD = 2;
 
-  // コンポーネントのマウント時に WebSocket へ接続（1回のみ）
+  // WebSocket 接続（1回のみ）
   useEffect(() => {
     console.log('WebSocketサーバーへ接続中...');
     const socket = new WebSocket(import.meta.env.VITE_SERVER_URL);
-    wsRef.current = socket; // useRef で保持するので再レンダリングの影響を受けない
+    wsRef.current = socket;
     socket.onopen = () => {
       console.log('WebSocketサーバーに接続しました');
-      socket.send(JSON.stringify({ type: 'register', role: 'bool', room: 'room1' }));
+      // 登録メッセージ作成
+      // 通常は role:"bool", room:"room1" を送信
+      // mode が "/sound_setting_mode" の場合、soundName, soundFiles も送信する
+      const registerMessage = { type: 'register', role: 'bool', room: 'room1' };
+      if (props.mode === '/sound_setting_mode') {
+        console.log('音声設定モードのため、音声ファイル情報を送信します');
+        console.log('soundName:', props.soundName);
+        console.log('soundFiles:', props.soundFiles);
+        registerMessage.mode = props.mode;
+        registerMessage.soundName = props.soundName;
+        registerMessage.soundFiles = props.soundFiles;
+      }
+      console.log('送信するやつ：',registerMessage);
+      socket.send(JSON.stringify(registerMessage));
     };
     socket.onmessage = async (event) => {
       const messageText = await event.data.text();
@@ -57,9 +70,9 @@ const JoyConComponent = forwardRef((props, ref) => {
         socket.close();
       }
     };
-  }, []);
+  }, [props.mode, props.soundName, props.soundFiles]);
 
-  // physicalな Joy-Con デバイスの接続処理
+  // physical な Joy-Con の接続処理
   const connectJoyCon = async () => {
     try {
       const filters = [{ vendorId: 0x057e }];
@@ -95,7 +108,6 @@ const JoyConComponent = forwardRef((props, ref) => {
         setIsShake(currentIsShake);
         setAccelerometer({ x: accelX, y: accelY, z: accelZ });
 
-        // useRef で保持している WebSocket を使用
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({ type: 'boolState', value: currentIsShake });
           console.log('WebSocket経由でデータ送信:', message);

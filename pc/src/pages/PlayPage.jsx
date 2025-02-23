@@ -1,41 +1,37 @@
-import React, {useState,useEffect} from 'react'
-import Preparation from './Preparation'
-import { useLocation } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import Preparation from './Preparation';
+import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const PlayPage = () => {
-    const location = useLocation();
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [data, setData] = useState();
-    const [mode, setMode] = useState();    
+  const location = useLocation();
+  const [isPlaying, setIsPlaying] = useState(false);
+  // Redux からグローバル状態を参照
+  const mode = useSelector((state) => state.settings.mode);
+  const soundNames = useSelector((state) => state.settings.soundNames);
+  const soundFiles = useSelector((state) => state.settings.soundFiles);
 
-    useEffect(() => {
-        // location.state が存在する場合のみデータを設定
-        if (location.state) {
-          setData(location.state);
-          setMode(location.state.mode);
-          console.log(location.state);
-          console.log('MODE:',location.state.mode);
-        }else {
-            window.location.href = '/modeselect';
-        }
-      }, [location.state]);
-    
   return (
     <>
-        {isPlaying ? (
-            <>
-            {/* // プレイ中画面 */}
-                <h1>Play画面</h1>
-                <button onClick={() => setIsPlaying(false)}>Stop</button>
-            </>
-        ):(<></>)}
-            {/* // 準備画面 */}
-            <Preparation
-                mode={mode}
-                setIsPlaying={setIsPlaying}
-            />
+      {isPlaying ? (
+        <div>
+          <h1>Play画面</h1>
+          <button onClick={() => setIsPlaying(false)}>Stop</button>
+        </div>
+      ) : null}
+      <Preparation
+        mode={mode}
+        setIsPlaying={setIsPlaying}
+        soundName={soundNames}
+        soundFiles={soundFiles}
+      />
+      <div>
+        <p>Mode: {mode}</p>
+        <p>Sound Names: {soundNames.join(', ')}</p>
+        <p>Sound Files: {soundFiles.join(', ')}</p>
+      </div>
     </>
-  )
-}
+  );
+};
 
-export default PlayPage
+export default PlayPage;
