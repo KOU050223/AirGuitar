@@ -84,8 +84,6 @@ const Preparation = ({ mode, setIsPlaying, soundName, soundFiles }) => {
         {/* mode, soundName, soundFiles を Joycon に渡す */}
         <Joycon ref={joyconRef} mode={mode} soundName={soundName} soundFiles={soundFiles} />
       </div>
-      {soundFiles}
-      {soundName}
     </div>
   );
 };

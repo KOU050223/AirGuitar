@@ -86,7 +86,7 @@ const JoyConComponent = forwardRef((props, ref) => {
       setStatus(`接続成功: ${devices[0].productName}`);
 
       devices[0].addEventListener('inputreport', (event) => {
-        console.log('input report 受信:', event);
+        // console.log('input report 受信:', event);
         const { data } = event;
         if (data.byteLength !== 48) {
           console.error('不正なデータ長:', data.byteLength);
@@ -110,7 +110,7 @@ const JoyConComponent = forwardRef((props, ref) => {
 
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({ type: 'boolState', value: currentIsShake });
-          console.log('WebSocket経由でデータ送信:', message);
+          // console.log('WebSocket経由でデータ送信:', message);
           wsRef.current.send(message);
         }
       });
