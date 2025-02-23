@@ -54,11 +54,10 @@ const Preparation = ({ mode, setIsPlaying }) => {
       {/* モーダルウィンドウ */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className='aspect-square h-72 w-72 rounded-md bg-white p-4'>
-              <QRCodeSVG value={url} size={224} />
-              <p>{url}</p>
-            </div>
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <p className="text-xl font-bold">スマートフォン接続用QRコード</p>
+            <QRCodeSVG value={url} size={200} className="mx-auto my-4" /> {/* QRコード表示 */}
+            <p className="text-sm text-gray-600">スマホでQRコードをスキャンしてください</p>
             <button
               onClick={() => setIsModalOpen(false)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg"
