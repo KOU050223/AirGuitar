@@ -24,18 +24,16 @@ const PlayPage = () => {
     <>
         {isPlaying ? (
             <>
-            // プレイ中画面
+            {/* // プレイ中画面 */}
                 <h1>Play画面</h1>
                 <button onClick={() => setIsPlaying(false)}>Stop</button>
             </>
-        ) : (
-            // 準備画面
+        ):(<></>)}
+            {/* // 準備画面 */}
             <Preparation
                 mode={mode}
                 setIsPlaying={setIsPlaying}
             />
-        )}
-      
     </>
   )
 }
