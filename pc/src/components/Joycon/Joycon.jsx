@@ -1,20 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useImperativeHandle, forwardRef, useEffect, useRef } from 'react';
 
 class JoyConHID {
   constructor(joyCon) {
     this.joyCon = joyCon;
-    this.globalPacketNumber = 0x00; // 0x0 ~ 0xf
+    this.globalPacketNumber = 0x00;
   }
 
   async sendCommand(subCommand, subCommandArguments) {
     this.joyCon.sendReport(0x01, this.createQuery(subCommand, subCommandArguments));
   }
 
-  // Joy-Con sendReport クエリを作成
-  // 参考: https://github.com/chromium/chromium/blob/ccd149af47315e4c6f2fc45d55be1b271f39062c/device/gamepad/nintendo_controller.cc#L1496
   createQuery(subCommand, subCommandArguments) {
     const query = new Array(48).fill(0x00);
-    query[0] = this.globalPacketNumber % 0x10; // 0x0 ~ 0xf
+    query[0] = this.globalPacketNumber % 0x10;
     query[1] = 0x00;
     query[2] = 0x01;
     query[5] = 0x00;
@@ -26,41 +24,45 @@ class JoyConHID {
   }
 }
 
-const JoyConComponent = () => {
+const JoyConComponent = forwardRef((props, ref) => {
   const [device, setDevice] = useState(null);
   const [status, setStatus] = useState('Joy-Con未接続');
-  const [ws, setWs] = useState(null);
+  const wsRef = useRef(null); // WebSocket 接続は useRef で管理
   const [accelerometer, setAccelerometer] = useState({ x: 0, y: 0, z: 0 });
   const [isShake, setIsShake] = useState(false);
-  const THRESHOLD = 2; // 振動検知の閾値
+  const THRESHOLD = 2;
 
-  // 共通のサブコマンド送信関数
-  const sendSubcommand = async (joycon, subcommand, data) => {
-    const header = new Uint8Array(10).fill(0); // ダミーの振動データ
-    const body = new Uint8Array([subcommand, ...data]);
-    const buf = new Uint8Array(header.length + body.length);
-    buf.set(header, 0);
-    buf.set(body, header.length);
-    await joycon.sendReport(0x01, buf);
-    console.log(`サブコマンド 0x${subcommand.toString(16)} を送信しました。`);
-  };
+  // コンポーネントのマウント時に WebSocket へ接続（1回のみ）
+  useEffect(() => {
+    console.log('WebSocketサーバーへ接続中...');
+    const socket = new WebSocket(import.meta.env.VITE_SERVER_URL);
+    wsRef.current = socket; // useRef で保持するので再レンダリングの影響を受けない
+    socket.onopen = () => {
+      console.log('WebSocketサーバーに接続しました');
+      socket.send(JSON.stringify({ type: 'register', role: 'bool', room: 'room1' }));
+    };
+    socket.onmessage = async (event) => {
+      const messageText = await event.data.text();
+      console.log('WebSocketサーバーからのメッセージ:', messageText);
+    };
+    socket.onerror = (error) => {
+      console.error('WebSocketエラー:', error);
+    };
+    socket.onclose = () => {
+      console.log('WebSocket接続が切断されました');
+    };
 
-  // ジャイロ有効化
-  const enableGyro = async (joycon) => {
-    await sendSubcommand(joycon, 0x40, [0x01]);
-    console.log('ジャイロ有効化コマンドを送信しました。');
-  };
+    return () => {
+      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
+        socket.close();
+      }
+    };
+  }, []);
 
-  // 加速度センサー有効化（JoyConHIDクラスを利用）
-  const enableAccelerometer = async (joyconHID) => {
-    await joyconHID.sendCommand(0x40, 0x01);
-    console.log('加速度センサー有効化コマンドを送信しました。');
-  };
-
-  // Joy-Con接続処理
+  // physicalな Joy-Con デバイスの接続処理
   const connectJoyCon = async () => {
     try {
-      const filters = [{ vendorId: 0x057e }]; // Nintendo のベンダーID
+      const filters = [{ vendorId: 0x057e }];
       const devices = await navigator.hid.requestDevice({ filters });
       if (devices.length === 0) {
         setStatus('デバイスが選択されませんでした');
@@ -70,7 +72,6 @@ const JoyConComponent = () => {
       setDevice(devices[0]);
       setStatus(`接続成功: ${devices[0].productName}`);
 
-      // input report イベントを監視して WebSocket 経由で送信
       devices[0].addEventListener('inputreport', (event) => {
         console.log('input report 受信:', event);
         const { data } = event;
@@ -94,58 +95,38 @@ const JoyConComponent = () => {
         setIsShake(currentIsShake);
         setAccelerometer({ x: accelX, y: accelY, z: accelZ });
 
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          // プロトコルに合わせ、type と value を含む boolState メッセージを送信
+        // useRef で保持している WebSocket を使用
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           const message = JSON.stringify({ type: 'boolState', value: currentIsShake });
           console.log('WebSocket経由でデータ送信:', message);
-          ws.send(message);
+          wsRef.current.send(message);
         }
       });
 
       const joyConHID = new JoyConHID(devices[0]);
-      // 加速度センサー有効化
-      await enableAccelerometer(joyConHID);
-      await delay(500); // センサーが有効になるまで待機
-      // ジャイロ有効化
-      await enableGyro(devices[0]);
+      await joyConHID.sendCommand(0x40, 0x01); // 加速度センサー有効化
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      await sendSubcommand(devices[0], 0x40, [0x01]); // ジャイロ有効化
     } catch (error) {
       console.error('接続エラー:', error);
       setStatus(`接続エラー: ${error}`);
     }
   };
 
-  // コンポーネントマウント時に WebSocket 接続を確立
-  useEffect(() => {
-    console.log('WebSocketサーバーへ接続中...');
-    const socket = new WebSocket(import.meta.env.VITE_SERVER_URL);
-    setWs(socket);
+  const sendSubcommand = async (joycon, subcommand, data) => {
+    const header = new Uint8Array(10).fill(0);
+    const body = new Uint8Array([subcommand, ...data]);
+    const buf = new Uint8Array(header.length + body.length);
+    buf.set(header, 0);
+    buf.set(body, header.length);
+    await joycon.sendReport(0x01, buf);
+    console.log(`サブコマンド 0x${subcommand.toString(16)} を送信しました。`);
+  };
 
-    socket.onopen = () => {
-      console.log('WebSocketサーバーに接続しました');
-      // boolクライアントとして登録（ルームIDはroom1）
-      socket.send(JSON.stringify({ type: 'register', role: 'bool', room: 'room1' }));
-    };
-
-    socket.onmessage = async (event) => {
-      const messageText = await event.data.text();
-      console.log('WebSocketサーバーからのメッセージ:', messageText);
-      // 必要に応じて受信メッセージの処理をここに追加
-    };
-
-    socket.onerror = (error) => {
-      console.error('WebSocketエラー:', error);
-    };
-
-    socket.onclose = () => {
-      console.log('WebSocket接続が切断されました');
-    };
-
-    return () => {
-      if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
-        socket.close();
-      }
-    };
-  }, []);
+  // 外部から connectJoyCon を呼び出せるようにする
+  useImperativeHandle(ref, () => ({
+    connectJoyCon,
+  }));
 
   return (
     <div>
@@ -153,14 +134,11 @@ const JoyConComponent = () => {
       <button onClick={connectJoyCon}>Joy-Conを接続</button>
       <p>{status}</p>
       <p>
-        加速度: X: {accelerometer.x.toFixed(4)}, Y: {accelerometer.y.toFixed(4)}, Z:{' '}
-        {accelerometer.z.toFixed(4)}
+        加速度: X: {accelerometer.x.toFixed(4)}, Y: {accelerometer.y.toFixed(4)}, Z: {accelerometer.z.toFixed(4)}
       </p>
       {isShake && <p>振動を検知しました！</p>}
     </div>
   );
-};
+});
 
 export default JoyConComponent;
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));

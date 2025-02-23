@@ -1,10 +1,13 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ModeButton from '../components/ModeButton.jsx';
 import { QRCodeSVG } from 'qrcode.react';
+import Joycon from '../components/Joycon/Joycon.jsx';
 
-const Preparation = ({mode}) => {
+const Preparation = ({ mode, setIsPlaying }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState('https://example.com');
+  const joyconRef = useRef(null);
+
   useEffect(() => {
     console.log('Preparation', mode);
     if (mode) {
@@ -12,16 +15,41 @@ const Preparation = ({mode}) => {
       setUrl(`${import.meta.env.VITE_PWA_URL}${mode}`);
     }
   }, [mode]);
+
+  const onStartGame = () => {
+    setIsPlaying(true);
+  };
+
+  // 非同期処理として connectJoyCon を呼び出す
+  const handleJoyConConnect = async () => {
+    console.log("joyConRef.current:", joyconRef.current);
+    try {
+      if (joyconRef.current?.connectJoyCon) {
+        await joyconRef.current.connectJoyCon();
+      } else {
+        console.error("connectJoyCon が存在しません。JoyConComponent のレンダリング状態を確認してください。");
+      }
+    } catch (error) {
+      console.error("connectJoyCon 呼び出し時のエラー:", error);
+    }
+  };
+
   return (
     <div className='grid grid-cols-1 gap-4 w-1/3 mx-auto'>
       <ModeButton
         buttonName={'スマートフォン接続ボタン'}
-        onClick={() => setIsModalOpen(true)} // ボタンを押したらモーダルを開く
+        onClick={() => setIsModalOpen(true)}
       />
       <p>スマートフォン接続完了</p>
-      <ModeButton buttonName={'Nintendo Switch接続ボタン'} />
+      <ModeButton 
+        buttonName={'Nintendo Switch接続ボタン'}
+        onClick={handleJoyConConnect}
+      />
       <p>Nintendo Switch接続完了</p>
-      <ModeButton buttonName={'エアギターで気持ちよくなろう！'} />
+      <ModeButton 
+        buttonName={'エアギターで気持ちよくなろう！'} 
+        onClick={onStartGame}
+      />
 
       {/* モーダルウィンドウ */}
       {isModalOpen && (
@@ -40,6 +68,11 @@ const Preparation = ({mode}) => {
           </div>
         </div>
       )}
+
+      {/* Joy-Con コンポーネントを参照用にレンダリング（画面上には表示しない） */}
+      <div style={{ display: 'none' }}>
+        <Joycon ref={joyconRef} />
+      </div>
     </div>
   );
 };

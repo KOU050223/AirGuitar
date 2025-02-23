@@ -15,18 +15,24 @@ const PlayPage = () => {
           setMode(location.state.mode);
           console.log(location.state);
           console.log('MODE:',location.state.mode);
+        }else {
+            window.location.href = '/modeselect';
         }
       }, [location.state]);
     
   return (
     <>
         {isPlaying ? (
+            <>
             // プレイ中画面
-            <button onClick={() => setIsPlaying(false)}>Stop</button>
+                <h1>Play画面</h1>
+                <button onClick={() => setIsPlaying(false)}>Stop</button>
+            </>
         ) : (
             // 準備画面
             <Preparation
                 mode={mode}
+                setIsPlaying={setIsPlaying}
             />
         )}
       
