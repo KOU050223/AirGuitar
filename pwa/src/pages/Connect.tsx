@@ -8,7 +8,9 @@ const Connect = () => {
                 <h1 className='text-center'>接続ページ</h1>
                 <Scan />
                 {/* テスト用 */}
-                <Link to='/sound_setting_mode' className='text-center'>サウンドセッティングモード</Link>
+                <p><Link to='/sound_setting_mode' className='text-center'>サウンドセッティングモード</Link></p>
+                <p><Link to='/pawer_code_mode'>パワーコード</Link></p>
+                <p><Link to='/easy_mode'>イージー</Link></p>
             </div>
         </>
     )

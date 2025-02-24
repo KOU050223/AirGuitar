@@ -46,12 +46,13 @@ const JoyConComponent = forwardRef((props, ref) => {
       // 登録メッセージ作成
       // 通常は role:"bool", room:"room1" を送信
       // mode が "/sound_setting_mode" の場合、soundName, soundFiles も送信する
-      const registerMessage = { type: 'register', role: 'bool', room: 'room1' };
+      const registerMessage = { type: 'register', role: 'bool', room: 'room1', mode: props.mode };
+      console.log('props.mode:', props.mode);
+      registerMessage.mode = props.mode;
       if (props.mode === '/sound_setting_mode') {
         console.log('音声設定モードのため、音声ファイル情報を送信します');
         console.log('soundName:', props.soundName);
         console.log('soundFiles:', props.soundFiles);
-        registerMessage.mode = props.mode;
         registerMessage.soundName = props.soundName;
         registerMessage.soundFiles = props.soundFiles;
       }
