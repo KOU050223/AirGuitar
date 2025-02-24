@@ -6,6 +6,7 @@ import WebSocketConnector from './components/WebSocketConnector.jsx'
 import Joycon from './components/Joycon/Joycon.jsx'
 import Preparation from './pages/Preparation.jsx'
 import AudioSettings from './pages/AudioSettings.jsx'
+import PlayPage from './pages/PlayPage.jsx'
 
 function App() {
 
@@ -19,13 +20,13 @@ function App() {
       <li><Link to='/audiosettings'>AudioSettings</Link></li>
 
       <Routes>
-        {/* <Route path="/" element={<App />} /> */}
+        <Route path="/" element={<ModeSelect />} />
         <Route path="/modeselect" element={<ModeSelect />} />
         <Route path="/websocketconnector" element={<WebSocketConnector />} />
         <Route path="/joycon" element={<Joycon />} />
         <Route path="/preparation" element={<Preparation />} />
         <Route path="/audiosettings" element={<AudioSettings />} />
-        {/* <Route path="/xxx" element={<xxx />} /> */}
+        <Route path="/playpage" element={<PlayPage />} />
       </Routes>
     </>
   )
