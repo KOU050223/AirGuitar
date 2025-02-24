@@ -21,12 +21,7 @@ const SoundButton: React.FC<SoundButtonProps> = ({label,onClick, active = false}
                 }
                 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-300
                 text-2xl
-              `}        
-            style={{ 
-            // Tailwindに無い細かい調整をするならこちらで指定
-            // transform: 'rotate(90deg)', 
-            // transformOrigin: 'center',
-            }}
+              `} 
       >
         {label}
       </button>

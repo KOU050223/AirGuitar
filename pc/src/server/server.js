@@ -8,6 +8,44 @@ const wss = new WebSocketServer({ port: port });
 
 // ルームごとの状態を保持するオブジェクト
 const rooms = {};
+// ここにパワーコード
+const pawerSoundNames = [
+  '0-22(6)', '0-22(5)', 
+  '1-33(6)', '1-33(5)', 
+  '2-44(6)', '2-44(5)', 
+  '3-55(6)', '3-55(5)',
+  '4-66(6)', '4-66(5)',
+  '5-77(6)', '5-77(5)',
+  '6-88(6)', '6-88(5)',
+  '7-99(6)', '7-99(5)',
+  '8-1010(6)', '8-1010(5)',
+  '9-1111(6)', '9-1111(5)',
+  '10-1212(6)', '10-1212(5)',
+  '11-1313(6)', '11-1313(5)',
+  '12-1414(6)', '12-1414(5)',
+  '13-1515(6)', '13-1515(5)',
+  '14-1616(6)', '14-1616(5)', 
+  '15-1717(6)', '15-1717(5)'
+];
+
+const pawerSoundFiles = [
+    '0-22(6).wav', '0-22(5).wav', 
+    '1-33(6).wav', '1-33(5).wav', 
+    '2-44(6).wav', '2-44(5).wav', 
+    '3-55(6).wav', '3-55(5).wav',
+    '4-66(6).wav', '4-66(5).wav',
+    '5-77(6).wav', '5-77(5).wav',
+    '6-88(6).wav', '6-88(5).wav',
+    '7-99(6).wav', '7-99(5).wav',
+    '8-1010(6).wav', '8-1010(5).wav',
+    '9-1111(6).wav', '9-1111(5).wav',
+    '10-1212(6).wav', '10-1212(5).wav',
+    '11-1313(6).wav', '11-1313(5).wav',
+    '12-1414(6).wav', '12-1414(5).wav',
+    '13-1515(6).wav', '13-1515(5).wav',
+    '14-1616(6).wav', '14-1616(5).wav', 
+    '15-1717(6).wav', '15-1717(5).wav'
+];
 
 /**
  * 各ルームの状態を管理するオブジェクトの型
@@ -17,8 +55,8 @@ const rooms = {};
  *   lastButtonValue: number | null,
  *   lastBoolValue: boolean,
  *   processTimer: NodeJS.Timer | null,
- *   buttons: Array(8),
- *   audioFiles: Array(8)
+ *   buttons: Array(16),
+ *   audioFiles: Array(16)
  * }
  */
 
@@ -53,8 +91,8 @@ wss.on('connection', (ws) => {
           lastButtonValue: null,
           lastBoolValue: false,
           processTimer: null,
-          buttons: new Array(8).fill(null), // 8つのボタン情報を格納
-          audioFiles: new Array(8).fill(null) // 8つの音声ファイルのパスやデータなど
+          buttons: new Array(16).fill(null), // 8つのボタン情報を格納
+          audioFiles: new Array(16).fill(null) // 8つの音声ファイルのパスやデータなど
         };
       }
 
@@ -76,6 +114,11 @@ wss.on('connection', (ws) => {
           console.log('ws:', ws);
           rooms[roomId].buttons = message.soundName;
           rooms[roomId].audioFiles = message.soundFiles;
+          console.log(`Room ${roomId} 初期化：buttons と audioFiles を登録しました。`);
+        }
+        if (message.mode === '/pawer_code_mode') {
+          rooms[roomId].buttons = pawerSoundNames;
+          rooms[roomId].audioFiles = pawerSoundFiles;
           console.log(`Room ${roomId} 初期化：buttons と audioFiles を登録しました。`);
         }
       }
@@ -190,3 +233,4 @@ function processEvent(roomId, button, audioFile) {
 }
 
 console.log(`WebSocket server is running on ws://localhost:${port}`);
+

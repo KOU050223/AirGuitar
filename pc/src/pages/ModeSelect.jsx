@@ -26,6 +26,7 @@ const ModeSelect = () => {
       dispatch(setSettings({ mode, soundNames, soundFiles }));
       navigate('/playpage');
     } else {
+      dispatch(setSettings({mode}));
       navigate('/playpage');
     }
   };
